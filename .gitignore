@@ -1,4 +1,11 @@
-/Git Commit Message Guidelines.md
 /AGENTS.md
 /.local/
+/.cache/
 /docs/
+__pycache__/
+*.py[cod]
+*.log
+.env
+.env.*
+!.env.example
+node_modules/

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MR哔哩哔哩助手-自动宽屏模式|自定义布局|智能连播|打造属于自己的B站
 // @namespace    https://github.com/iMortRex
-// @version      1.1.11
+// @version      1.1.12
 // @description  自动宽屏模式|自定义布局|智能连播...更多功能等你体验, 打造属于自己的B站~
 // @author       Mort Rex
 // @run-at       document-start
@@ -15,8 +15,8 @@
 // @grant        GM_unregisterMenuCommand
 // @noframes
 // @license      MIT
-// @downloadURL https://update.greasyfork.org/scripts/445241/MR%E5%93%94%E5%93%A9%E5%93%94%E5%93%A9%E5%8A%A9%E6%89%8B-%E8%87%AA%E5%8A%A8%E5%AE%BD%E5%B1%8F%E6%A8%A1%E5%BC%8F%7C%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B8%83%E5%B1%80%7C%E6%99%BA%E8%83%BD%E8%BF%9E%E6%92%AD%7C%E6%89%93%E9%80%A0%E5%B1%9E%E4%BA%8E%E8%87%AA%E5%B7%B1%E7%9A%84B%E7%AB%99.user.js
-// @updateURL https://update.greasyfork.org/scripts/445241/MR%E5%93%94%E5%93%A9%E5%93%94%E5%93%A9%E5%8A%A9%E6%89%8B-%E8%87%AA%E5%8A%A8%E5%AE%BD%E5%B1%8F%E6%A8%A1%E5%BC%8F%7C%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B8%83%E5%B1%80%7C%E6%99%BA%E8%83%BD%E8%BF%9E%E6%92%AD%7C%E6%89%93%E9%80%A0%E5%B1%9E%E4%BA%8E%E8%87%AA%E5%B7%B1%E7%9A%84B%E7%AB%99.meta.js
+// @downloadURL https://raw.githubusercontent.com/miaonai/MR-bilibili-helper/main/MR%E5%93%94%E5%93%A9%E5%93%94%E5%93%A9%E5%8A%A9%E6%89%8B.user.js
+// @updateURL   https://raw.githubusercontent.com/miaonai/MR-bilibili-helper/main/MR%E5%93%94%E5%93%A9%E5%93%94%E5%93%A9%E5%8A%A9%E6%89%8B.user.js
 // ==/UserScript==
 
 (function () {

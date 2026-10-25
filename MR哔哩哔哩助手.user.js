@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         MR哔哩哔哩助手-自动宽屏模式|自定义布局|智能连播|打造属于自己的B站
-// @namespace    https://github.com/iMortRex
-// @version      1.1.12
+// @namespace    https://github.com/miaonai
+// @version      1.1.13
 // @description  自动宽屏模式|自定义布局|智能连播...更多功能等你体验, 打造属于自己的B站~
-// @author       Mort Rex
+// @author       Mort Rex, MiaoNai
 // @run-at       document-start
 // @match        *://*.bilibili.com/*
 // @icon         https://www.bilibili.com/favicon.ico

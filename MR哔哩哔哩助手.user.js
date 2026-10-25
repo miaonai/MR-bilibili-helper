@@ -254,9 +254,10 @@
 
             '.bpx-player-shadow-progress-area[mr_hide_progress_area=true] * { display: none !important; }',
 
-            '.left-container #viewbox_report[mr_layout=true]{padding-bottom:12px!important;margin-bottom:0!important;border-bottom:1px solid var(--line_regular)!important}',
+            '.left-container #viewbox_report[mr_layout=true]{height:auto!important;padding:16px 0 12px!important;margin-bottom:0!important;border-bottom:1px solid var(--line_regular)!important}',
             '.left-container .up-panel-container[mr_layout=true]{display:flex!important;flex-direction:row!important;justify-content:space-between!important;align-items:center!important;width:100%!important;padding:16px 0!important;margin:0!important;border-bottom:1px solid var(--line_regular)!important;height:auto!important;box-sizing:border-box!important}',
             '.left-container .up-panel-container[mr_layout=true] .up-info-container{display:flex!important;flex-direction:row!important;align-items:center!important;flex:1!important;margin:0!important;height:auto!important;width:auto!important;min-width:0!important}',
+            '.left-container .up-panel-container[mr_layout=true] .members-info-container,.left-container .up-panel-container[mr_layout=true] .mmembers-info-container{width:100%!important;min-width:0!important;padding-top:0!important}',
             '.left-container .up-panel-container[mr_layout=true] .up-info--left{margin-right:16px!important;flex-shrink:0!important;display:block!important}',
             '.left-container .up-panel-container[mr_layout=true] .up-info--right{display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:flex-start!important;flex:1!important;height:auto!important;margin:0!important;padding:0!important;overflow:hidden!important}',
             '.left-container .up-panel-container[mr_layout=true] .up-name{font-size:16px!important;line-height:20px!important;display:block!important}',
@@ -1123,7 +1124,9 @@
                 if (upPanel) {
                     var avatarImg = upPanel.querySelector('.bili-avatar-img, img');
                     var followBtn = upPanel.querySelector('.follow-btn');
-                    if (avatarImg && followBtn) isUpPanelReady = true;
+                    // 创作团队使用独立的成员卡片，没有单 UP 主的 .follow-btn。
+                    var membersInfo = upPanel.querySelector('.members-info-container, .mmembers-info-container');
+                    if (avatarImg && (followBtn || membersInfo)) isUpPanelReady = true;
                 }
 
                 if (!loadReady || !viewbox || !arc || !upPanel || !leftContainer || !rightContainerInner || !isUpPanelReady) {
@@ -1134,7 +1137,8 @@
                 var on = GM_getValue('MRMenuMoveTitleAndUpinfo') == 1;
 
                 if (on) {
-                    if (viewbox.parentNode !== leftContainer || upPanel.parentNode !== leftContainer) {
+                    if (viewbox.parentNode !== leftContainer || upPanel.parentNode !== leftContainer ||
+                        viewbox.nextElementSibling !== upPanel || upPanel.nextElementSibling !== arc) {
                         if (arc && arc.parentNode === leftContainer) {
                             leftContainer.insertBefore(viewbox, arc);
                         } else {
@@ -1217,11 +1221,7 @@
                     if (viewbox.parentNode === leftContainer) {
                         viewbox.removeAttribute('mr_layout');
                         if (playerWrap && playerWrap.parentNode === leftContainer) {
-                            if (playerWrap.nextSibling) {
-                                leftContainer.insertBefore(viewbox, playerWrap.nextSibling);
-                            } else {
-                                leftContainer.appendChild(viewbox);
-                            }
+                            leftContainer.insertBefore(viewbox, playerWrap);
                         } else {
                             leftContainer.appendChild(viewbox);
                         }
@@ -1750,15 +1750,20 @@
             var perch = document.getElementsByClassName('bpx-player-video-perch')[0];
             var primary = document.getElementsByClassName('bpx-player-primary-area')[0];
             if (!perch || !primary || !loadReady) { setTimeout(removeWidescreenBlack, 500); return; }
-            if (GM_getValue('MRPlayerMode') != 2 && GM_getValue('MRMenuRemoveWidescreenBlack') == 1) {
-                if (primary.parentElement.getAttribute('data-screen') != 'full' && perch.style.height == '') {
-                    perch.style.cssText += 'height: auto !important;';
-                    primary.style.cssText += 'height: auto !important;';
-                } else if (primary.parentElement.getAttribute('data-screen') == 'full' && perch.style.height != '') {
-                    perch.style.height = ''; primary.style.height = '';
-                }
+            var video = primary.querySelector('video, bwp-video');
+            // 使用视频原始尺寸；元数据尚未加载时保留高度限制，避免竖屏被撑大。
+            var isLandscape = video && video.videoWidth > 0 && video.videoHeight > 0 &&
+                video.videoWidth >= video.videoHeight;
+            var shouldRemove = GM_getValue('MRPlayerMode') != 2 &&
+                GM_getValue('MRMenuRemoveWidescreenBlack') == 1 && isLandscape &&
+                primary.parentElement.getAttribute('data-screen') == 'wide';
+            if (shouldRemove) {
+                perch.style.setProperty('height', 'auto', 'important');
+                primary.style.setProperty('height', 'auto', 'important');
             } else {
-                if (perch.style.height != '') { perch.style.height = ''; primary.style.height = ''; }
+                // 切换到竖屏、全屏或关闭选项时，分别清除本功能写入的高度。
+                if (perch.style.height == 'auto') perch.style.removeProperty('height');
+                if (primary.style.height == 'auto') primary.style.removeProperty('height');
             }
             setTimeout(removeWidescreenBlack, 500);
         }

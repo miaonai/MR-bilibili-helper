@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MR哔哩哔哩助手-自动宽屏模式|自定义布局|智能连播|打造属于自己的B站
 // @namespace    https://github.com/miaonai
-// @version      1.1.13
+// @version      1.1.14
 // @description  自动宽屏模式|自定义布局|智能连播...更多功能等你体验, 打造属于自己的B站~
 // @author       Mort Rex, MiaoNai
 // @run-at       document-start
@@ -104,6 +104,7 @@
     var notificationError = '错误';
 
     var loadReady = false;
+    var widescreenBlackState = { timerId: null, styles: [] };
     var isMRMenuMoving = false;
     var isMRMenuMovingX = 0;
     var isMRMenuMovingY = 0;
@@ -1747,9 +1748,20 @@
         }
 
         function removeWidescreenBlack() {
+            // 菜单点击和页面初始化共用一个轮询；先恢复上次写入的高度再测量。
+            clearTimeout(widescreenBlackState.timerId);
+            widescreenBlackState.styles.forEach(function (saved) {
+                if (saved.element.style.height !== saved.applied ||
+                    saved.element.style.getPropertyPriority('height') !== 'important') return;
+                if (saved.height) saved.element.style.setProperty('height', saved.height, saved.priority);
+                else saved.element.style.removeProperty('height');
+            });
+            widescreenBlackState.styles = [];
+            widescreenBlackState.timerId = setTimeout(removeWidescreenBlack, 500);
+
             var perch = document.getElementsByClassName('bpx-player-video-perch')[0];
             var primary = document.getElementsByClassName('bpx-player-primary-area')[0];
-            if (!perch || !primary || !loadReady) { setTimeout(removeWidescreenBlack, 500); return; }
+            if (!perch || !primary || !loadReady) return;
             var video = primary.querySelector('video, bwp-video');
             // 使用视频原始尺寸；元数据尚未加载时保留高度限制，避免竖屏被撑大。
             var isLandscape = video && video.videoWidth > 0 && video.videoHeight > 0 &&
@@ -1758,14 +1770,24 @@
                 GM_getValue('MRMenuRemoveWidescreenBlack') == 1 && isLandscape &&
                 primary.parentElement.getAttribute('data-screen') == 'wide';
             if (shouldRemove) {
-                perch.style.setProperty('height', 'auto', 'important');
-                primary.style.setProperty('height', 'auto', 'important');
-            } else {
-                // 切换到竖屏、全屏或关闭选项时，分别清除本功能写入的高度。
-                if (perch.style.height == 'auto') perch.style.removeProperty('height');
-                if (primary.style.height == 'auto') primary.style.removeProperty('height');
+                var area = primary.querySelector('.bpx-player-video-area');
+                if (!area) return;
+                var width = perch.getBoundingClientRect().width;
+                var playerHeight = primary.parentElement.getBoundingClientRect().height;
+                if (width <= 0 || playerHeight <= 0) return;
+                // 外框仍占据站点分配的高度。超宽视频不能将内部缩短，否则弹幕栏上移、底部留白。
+                // 扣除弹幕发送栏等非画面区域；只有铺满宽度需要更高画面时才增高。
+                var extraHeight = Math.max(0, primary.getBoundingClientRect().height - area.getBoundingClientRect().height);
+                var height = Math.max(playerHeight - extraHeight, width * video.videoHeight / video.videoWidth);
+                [[perch, height + 'px'], [primary, 'auto']].forEach(function (entry) {
+                    var element = entry[0];
+                    var saved = { element: element, height: element.style.height,
+                        priority: element.style.getPropertyPriority('height') };
+                    element.style.setProperty('height', entry[1], 'important');
+                    saved.applied = element.style.height;
+                    widescreenBlackState.styles.push(saved);
+                });
             }
-            setTimeout(removeWidescreenBlack, 500);
         }
 
         var removeKeywordStarted = false;
